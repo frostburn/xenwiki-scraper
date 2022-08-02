@@ -5,6 +5,33 @@ import json
 
 from utils import Soup
 
+PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+
+class Monzo:
+    def __init__(self, value):
+        try:
+            value = Fraction(value.replace(" ", ""))
+            n = value.numerator
+            d = value.denominator
+            self.value = []
+            for prime in PRIMES:
+                component = 0
+                while n % prime == 0:
+                    n //= prime
+                    component += 1
+                while d % prime == 0:
+                    d //= prime
+                    component -= 1
+                self.value.append(component)
+            if n != 1 or d != 1:
+                print("Out of primes", value, n, d)
+                raise ValueError("Out of primes")
+            while self.value[-1] == 0:
+                self.value.pop()
+
+        except ValueError:
+            self.value = list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
+
 non_names = [
     "5-limit", "7-limit", "11-limit", "13-limit", "17-limit", "19-limit", "23-limit",
     "Rank-4 temperaments", "Rank five",
@@ -34,8 +61,13 @@ def try_parse_subgroup(line):
 
 def try_parse_commas(line):
     try:
-        line = line.split(":")[1].strip()
-        return list(map(Fraction, line.replace(" ", ",").replace(",,", ",").split(",")))
+        line = line.split(":")[1].strip().strip(" (mirkwai)(hemimean)")
+        if "=" in line:
+            line = line.split("=")[1].strip()
+        elif "⟩" in line or ">" in line:
+            line = line.replace("|", "[")
+            return list(map(Monzo, line.split(", [")))
+        return list(map(Monzo, line.replace(" ", ",").replace(",,", ",").split(",")))
     except Exception:
         return None
 
@@ -116,7 +148,7 @@ for filename in filenames:
                 "title": title,
                 "subtitle": subtitle,
                 "subgroup": ".".join(map(str, subgroup)),
-                "commas": ",".join(map(str, commas)),
+                "commas": list(map(lambda m: m.value, commas)),
                 "mapping": mapping,
                 "generator": generator,
                 "optimal": optimal,
