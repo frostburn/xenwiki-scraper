@@ -10,7 +10,7 @@ PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67
 class Monzo:
     def __init__(self, value):
         try:
-            value = Fraction(value.replace(" ", ""))
+            value = Fraction(value)
             n = value.numerator
             d = value.denominator
             self.value = []
@@ -33,8 +33,9 @@ class Monzo:
             self.value = list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
 
 non_names = [
-    "5-limit", "7-limit", "11-limit", "13-limit", "17-limit", "19-limit", "23-limit",
-    "Rank-4 temperaments", "Rank five",
+    "5-limit", "7-limit", "11-limit", "13-limit", "17-limit", "19-limit", "23-limit", "29-limit", "31-limit", "37-limit", "41-limit", "43-limit", "47-limit", "53-limit",
+    "Rank-4 temperaments", "Rank five", "No-31's 37-limit", "5-limit (university)", "5-limit (laconic)", "7-limit (squalentine)",
+    "5-limit (supersharp)", "5-limit (avila)", "7-limit (Crusher)", "Subgroup temperament",
 ]
 
 def string_contents(node):
@@ -63,11 +64,11 @@ def try_parse_commas(line):
     try:
         line = line.split(":")[1].strip().strip(" (mirkwai)(hemimean)")
         if "=" in line:
-            line = line.split("=")[1].strip()
+            line = line.split("=")[1].strip().replace(" ", "")
         elif "⟩" in line or ">" in line:
             line = line.replace("|", "[")
             return list(map(Monzo, line.split(", [")))
-        return list(map(Monzo, line.replace(" ", ",").replace(",,", ",").split(",")))
+        return list(map(Monzo, line.replace(" ", ",").replace(",,,", ",").replace(",,", ",").split(",")))
     except Exception:
         return None
 
@@ -114,6 +115,8 @@ for filename in filenames:
         else:
             title = name
             current_name = name
+        sg = None
+        cl = None
         subgroup = None
         commas = None
         mapping = None
@@ -131,8 +134,10 @@ for filename in filenames:
                 continue
             lower = contents.lower()
             if "subgroup" in lower and not isinstance(subgroup, list):
+                sg = contents
                 subgroup = try_parse_subgroup(contents)
-            elif "comma" in lower:
+            elif "comma" in lower and "comma pump" not in lower:
+                cl = contents
                 commas = try_parse_commas(contents)
             elif "mapping" in lower:
                 mapping = contents
@@ -157,9 +162,9 @@ for filename in filenames:
 
             last_name = current_name
         elif commas:
-            print("failed subgroup", title, subtitle)
+            print("failed subgroup", title, subtitle, sg)
         elif subgroup:
-            print("failed commas", title, subtitle)
+            print("failed commas", title, subtitle, cl)
 
 with open("json/out.json", "w") as fp:
     json.dump({"temperaments": results}, fp)
