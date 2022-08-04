@@ -7,30 +7,30 @@ from utils import Soup
 
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
 
-class Monzo:
-    def __init__(self, value):
-        try:
-            value = Fraction(value)
-            n = value.numerator
-            d = value.denominator
-            self.value = []
-            for prime in PRIMES:
-                component = 0
-                while n % prime == 0:
-                    n //= prime
-                    component += 1
-                while d % prime == 0:
-                    d //= prime
-                    component -= 1
-                self.value.append(component)
-            if n != 1 or d != 1:
-                print("Out of primes", value, n, d)
-                raise ValueError("Out of primes")
-            while self.value[-1] == 0:
-                self.value.pop()
+def toMonzo(value):
+    try:
+        value = Fraction(value)
+        n = value.numerator
+        d = value.denominator
+        result = []
+        for prime in PRIMES:
+            component = 0
+            while n % prime == 0:
+                n //= prime
+                component += 1
+            while d % prime == 0:
+                d //= prime
+                component -= 1
+            result.append(component)
+        if n != 1 or d != 1:
+            print("Out of primes", value, n, d)
+            raise ValueError("Out of primes")
+        while result[-1] == 0:
+            result.pop()
+        return result
 
-        except ValueError:
-            self.value = list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
+    except ValueError:
+        return list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
 
 non_names = [
     "5-limit", "7-limit", "11-limit", "13-limit", "17-limit", "19-limit", "23-limit", "29-limit", "31-limit", "37-limit", "41-limit", "43-limit", "47-limit", "53-limit",
@@ -67,8 +67,8 @@ def try_parse_commas(line):
             line = line.split("=")[1].strip().replace(" ", "")
         elif "⟩" in line or ">" in line:
             line = line.replace("|", "[")
-            return list(map(Monzo, line.split(", [")))
-        return list(map(Monzo, line.replace(" ", ",").replace(",,,", ",").replace(",,", ",").split(",")))
+            return list(map(toMonzo, line.split(", [")))
+        return list(map(toMonzo, line.replace(" ", ",").replace(",,,", ",").replace(",,", ",").split(",")))
     except Exception:
         return None
 
@@ -81,8 +81,15 @@ def parse_mapping(line):
         result.append(list(map(Fraction, vec.split())))
     return result
 
-# TODO: Fix Marveltwin
-# TODO: Fix Mercator
+# Fixes Mercator
+subgroups = {
+    "Mercator": {None: "2.3.5"},
+    "Schismerc": {None: "2.3.5.7"},
+    "Cartography": {None: "2.3.5.7.11", "13-limit": "2.3.5.7.11.13"},
+    "Pentacontatritonic": {None: "2.3.5.7.11", "13-limit": "2.3.5.7.11.13"},
+    "Boiler": {None: "2.3.5.7.11"},
+    "Joliet": {None: "2.3.5.7.11", "13-limit": "2.3.5.7.11.13"},
+}
 
 directories = [
     "downloads/chromatic_realms",
@@ -93,12 +100,126 @@ directories = [
 filenames = ["downloads/Chromatic_pairs.html"]
 for directory in directories:
     for filename in os.listdir(directory):
+        if "Marveltwin" in filename:
+            continue
         base, ext = os.path.splitext(filename)
         if ext != ".html":
             continue
         filenames.append(os.path.join(directory, filename))
 
-results = []
+# Marveltwin parsed manually
+results = [
+    {
+        "title": "Marveltwin",
+        "subtitle": "Rank five",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": None
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "225/224",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("225/224")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.668",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "364/363",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("364/363")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.011",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "441/440",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("441/440")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.037",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "169/168",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("169/168")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 2.975",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "540/539",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("540/539")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.281",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "352/351",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("352/351")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.434",
+    },
+    {
+        "title": "Marveltwin",
+        "subtitle": "625/624",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("625/624")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^6 * Badness: 3.563",
+    },
+    {
+        "title": "Portending",
+        "subtitle": None,
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("364/363"), toMonzo("441/440")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^5 * Badness: 62.715",
+    },
+    {
+        "title": "Marvel",
+        "subtitle": "Hecate",
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("225/224"), toMonzo("325/324"), toMonzo("385/384")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^5 * Badness: 72.113",
+    },
+    {
+        "title": "Sumatra",
+        "subtitle": None,
+        "subgroup": "2.3.5.7.11.13",
+        "commas": [toMonzo("325/324"), toMonzo("385/384"), toMonzo("625/624")],
+        "mapping": None,
+        "generator": None,
+        "optimal": None,
+        "badness": "10^5 * Badness: 68.005",
+    },
+]
 
 for filename in filenames:
     print("...Opening", filename)
@@ -107,7 +228,7 @@ for filename in filenames:
 
     last_name = None
     for headline in soup.find_all(class_="mw-headline"):
-        name = headline.string
+        name = headline.string.strip()
         subtitle = None
         if last_name and (name in non_names or "." in name or re.match(r"\d+/\d+", name)):
             title = last_name
@@ -148,12 +269,14 @@ for filename in filenames:
             elif "badness" in lower:
                 badness = contents
             node = node.next_sibling
+        if not subgroup:
+            subgroup = try_parse_subgroup(subgroups.get(title, {}).get(subtitle))
         if subgroup and commas:
             results.append({
                 "title": title,
                 "subtitle": subtitle,
                 "subgroup": ".".join(map(str, subgroup)),
-                "commas": list(map(lambda m: m.value, commas)),
+                "commas": commas,
                 "mapping": mapping,
                 "generator": generator,
                 "optimal": optimal,
