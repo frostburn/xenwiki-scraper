@@ -8,6 +8,7 @@ from utils import Soup
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
 
 def toMonzo(value):
+    value = value.strip()
     try:
         value = Fraction(value)
         n = value.numerator
@@ -66,8 +67,21 @@ def try_parse_commas(line):
         if "=" in line:
             line = line.split("=")[1].strip().replace(" ", "")
         elif "⟩" in line or ">" in line:
-            line = line.replace("|", "[")
-            return list(map(toMonzo, line.split(", [")))
+            line = line.replace("|", "[").replace("⟩", ">")
+            cleaned = ""
+            in_monzo = False
+            for c in line:
+                if c == "[":
+                    in_monzo = True
+                    cleaned += c
+                elif c == ">":
+                    in_monzo = False
+                    cleaned += c
+                elif in_monzo and c == ",":
+                    pass
+                else:
+                    cleaned += c
+            return list(map(toMonzo, cleaned.split(",")))
         return list(map(toMonzo, line.replace(" ", ",").replace(",,,", ",").replace(",,", ",").split(",")))
     except Exception:
         return None
@@ -228,6 +242,8 @@ for filename in filenames:
 
     last_name = None
     for headline in soup.find_all(class_="mw-headline"):
+        if headline.string is None:
+            continue
         name = headline.string.strip()
         subtitle = None
         if last_name and (name in non_names or "." in name or re.match(r"\d+/\d+", name)):
