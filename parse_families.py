@@ -6,8 +6,9 @@ import json
 from utils import Soup
 
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+MAX_COMPLEXITY = 9007199254740991
 
-def toMonzo(value):
+def toMonzo(value, preserve_fractions=True):
     value = value.strip()
     try:
         value = Fraction(value)
@@ -28,7 +29,10 @@ def toMonzo(value):
             raise ValueError("Out of primes")
         while result[-1] == 0:
             result.pop()
-        return result
+        if preserve_fractions and value.numerator <= MAX_COMPLEXITY and value.denominator <= MAX_COMPLEXITY:
+            return value
+        else:
+            return result
 
     except ValueError:
         return list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
@@ -95,6 +99,15 @@ def parse_mapping(line):
         result.append(list(map(Fraction, vec.split())))
     return result
 
+def stringify_commas(commas):
+    result = []
+    for comma in commas:
+        if isinstance(comma, Fraction):
+            result.append(str(comma))
+        else:
+            result.append(comma)
+    return result
+
 # Fixes Mercator
 subgroups = {
     "Mercator": {None: "2.3.5"},
@@ -127,7 +140,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "Rank five",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324")],
+        "commas": ["325/324"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -137,7 +150,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "225/224",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("225/224")],
+        "commas": ["325/324", "225/224"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -147,7 +160,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "364/363",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("364/363")],
+        "commas": ["325/324", "364/363"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -157,7 +170,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "441/440",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("441/440")],
+        "commas": ["325/324", "441/440"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -167,7 +180,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "169/168",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("169/168")],
+        "commas": ["325/324", "169/168"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -177,7 +190,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "540/539",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("540/539")],
+        "commas": ["325/324", "540/539"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -187,7 +200,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "352/351",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("352/351")],
+        "commas": ["325/324", "352/351"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -197,7 +210,7 @@ results = [
         "title": "Marveltwin",
         "subtitle": "625/624",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("625/624")],
+        "commas": ["325/324", "625/624"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -207,7 +220,7 @@ results = [
         "title": "Portending",
         "subtitle": None,
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("364/363"), toMonzo("441/440")],
+        "commas": ["325/324", "364/363", "441/440"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -217,7 +230,7 @@ results = [
         "title": "Marvel",
         "subtitle": "Hecate",
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("225/224"), toMonzo("325/324"), toMonzo("385/384")],
+        "commas": ["225/224", "325/324", "385/384"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -227,7 +240,7 @@ results = [
         "title": "Sumatra",
         "subtitle": None,
         "subgroup": "2.3.5.7.11.13",
-        "commas": [toMonzo("325/324"), toMonzo("385/384"), toMonzo("625/624")],
+        "commas": ["325/324", "385/384", "625/624"],
         "mapping": None,
         "generator": None,
         "optimal": None,
@@ -261,6 +274,9 @@ for filename in filenames:
         optimal = None
         badness = None
         node = headline.parent.next_sibling
+        if title == '7-limit (decovulture)':
+            subtitle = subtitle or title
+            title = 'Baffin'
         while node and getattr(node, "name", None) not in ["h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"]:
             contents = string_contents(node).strip()
             if "NewPP limit report" in contents:
@@ -292,7 +308,7 @@ for filename in filenames:
                 "title": title,
                 "subtitle": subtitle,
                 "subgroup": ".".join(map(str, subgroup)),
-                "commas": commas,
+                "commas": stringify_commas(commas),
                 "mapping": mapping,
                 "generator": generator,
                 "optimal": optimal,
