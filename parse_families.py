@@ -38,8 +38,20 @@ def toMonzo(value, preserve_fractions=True):
         return list(map(int, value.strip("|[⟩>").replace(" ", ",").replace(",,", ",").split(",")))
 
 non_names = [
-    "5-limit", "7-limit", "11-limit", "13-limit", "17-limit", "19-limit", "23-limit", "29-limit", "31-limit", "37-limit", "41-limit", "43-limit", "47-limit", "53-limit",
-    "Rank-4 temperaments", "Rank five", "No-31's 37-limit", "5-limit (university)", "5-limit (laconic)", "7-limit (squalentine)",
+    "5-limit", "7-limit", "11-limit", "13-limit","17-limit", "19-limit",
+    "23-limit", "29-limit", "31-limit", "37-limit", "41-limit", "43-limit", "47-limit", "53-limit",
+
+    "Rank-2 temperaments",
+    "Rank-3 temperaments",
+    "Rank-4 temperaments",
+    "Rank-5 temperaments",
+
+    "Rank two",
+    "Rank three",
+    "Rank four",
+    "Rank five",
+
+    "No-31's 37-limit", "5-limit (university)", "5-limit (laconic)", "7-limit (squalentine)",
     "5-limit (supersharp)", "5-limit (avila)", "7-limit (Crusher)", "Subgroup temperament",
 ]
 
@@ -248,6 +260,9 @@ results = [
     },
 ]
 
+def is_non_name(name):
+    return name in non_names or "." in name or re.match(r"\d+/\d+", name)
+
 for filename in filenames:
     print("...Opening", filename)
     with open(filename, "r") as fp:
@@ -262,7 +277,7 @@ for filename in filenames:
         headline_level = getattr(headline.parent, "name")
         name = headline.string.strip()
         subtitle = None
-        if last_name and (name in non_names or "." in name or re.match(r"\d+/\d+", name)):
+        if last_name and is_non_name(name):
             title = last_name
             subtitle = name
         elif headline_level > header_level:
@@ -324,7 +339,10 @@ for filename in filenames:
         elif subgroup:
             print("failed commas", title, subtitle, cl)
 
-        if headline_level <= header_level:
+        if is_non_name(name):
+            header_level = "h9"
+            header_name = None
+        elif headline_level <= header_level:
             header_level = headline_level
             header_name = name
 
