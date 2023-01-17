@@ -254,13 +254,19 @@ for filename in filenames:
         soup = Soup(fp)
 
     last_name = None
+    header_name = None
+    header_level = "h9"
     for headline in soup.find_all(class_="mw-headline"):
         if headline.string is None:
             continue
+        headline_level = getattr(headline.parent, "name")
         name = headline.string.strip()
         subtitle = None
         if last_name and (name in non_names or "." in name or re.match(r"\d+/\d+", name)):
             title = last_name
+            subtitle = name
+        elif headline_level > header_level:
+            title = header_name
             subtitle = name
         else:
             title = name
@@ -274,9 +280,6 @@ for filename in filenames:
         optimal = None
         badness = None
         node = headline.parent.next_sibling
-        if title == '7-limit (decovulture)':
-            subtitle = subtitle or title
-            title = 'Baffin'
         while node and getattr(node, "name", None) not in ["h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"]:
             contents = string_contents(node).strip()
             if "NewPP limit report" in contents:
@@ -320,6 +323,10 @@ for filename in filenames:
             print("failed subgroup", title, subtitle, sg)
         elif subgroup:
             print("failed commas", title, subtitle, cl)
+
+        if headline_level <= header_level:
+            header_level = headline_level
+            header_name = name
 
 with open("json/out.json", "w") as fp:
     json.dump({"temperaments": results}, fp)
