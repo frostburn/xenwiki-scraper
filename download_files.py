@@ -3,6 +3,8 @@ from pathlib import Path
 import requests
 from utils import Soup
 
+Path("downloads/commas").mkdir(parents=True, exist_ok=True)
+
 Path("downloads/families").mkdir(parents=True, exist_ok=True)
 Path("downloads/clans").mkdir(parents=True, exist_ok=True)
 Path("downloads/subcategories").mkdir(parents=True, exist_ok=True)
@@ -18,6 +20,24 @@ def download_page(url, filename):
             fp.write(chunk)
 
 base_url = "https://en.xen.wiki"
+
+
+comma_pages = [
+    "Unnoticeable_comma",
+    "Small_comma",
+    "Medium_comma",
+    "Large_comma",
+    "Table_of_3-limit_commas",
+    "Table_of_5-limit_commas",
+    "List_of_superparticular_intervals",
+]
+
+for page in comma_pages:
+    url = f"{base_url}/w/{page}"
+    filename = f"downloads/commas/{page}.html"
+    if not exists(filename):
+        print("downloading", url)
+        download_page(url, filename)
 
 families_url = f"{base_url}/w/Category:Temperament_families"
 families_filename = "downloads/Temperament_families.html"
