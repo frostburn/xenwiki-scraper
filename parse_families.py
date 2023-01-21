@@ -46,10 +46,18 @@ non_names = [
     "Rank-4 temperaments",
     "Rank-5 temperaments",
 
+    "Subgroup temperaments",
+    "Fractional subgroup temperaments",
+
     "Rank two",
     "Rank three",
     "Rank four",
     "Rank five",
+
+    "Rank two temperaments",
+    "Rank three temperaments",
+    "Rank four temperaments",
+    "Rank five temperaments",
 
     "No-31's 37-limit", "5-limit (university)", "5-limit (laconic)", "7-limit (squalentine)",
     "5-limit (supersharp)", "5-limit (avila)", "7-limit (Crusher)", "Subgroup temperament",
