@@ -4,6 +4,7 @@ import os
 import json
 from utils import Soup, LOG_PRIMES, PRIMES
 from numpy import dot
+from pathlib import Path
 
 EPSILON = 0.1
 
@@ -107,5 +108,8 @@ for filename in filenames:
                     except ValueError as e:
                         print("Failed to parse", data)
 
-with open("json/commas.json", "w") as fp:
+json_path = Path("json")
+json_path.mkdir(parents=True, exist_ok=True)
+
+with open(json_path / "commas.json", "w") as fp:
     json.dump(result, fp, indent=None, separators=[",", ":"])

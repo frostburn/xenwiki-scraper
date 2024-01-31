@@ -2,6 +2,7 @@ from fractions import Fraction
 import os
 import re
 import json
+from pathlib import Path
 
 from utils import Soup
 
@@ -356,5 +357,8 @@ for filename in filenames:
             header_level = headline_level
             header_name = name
 
-with open("json/out.json", "w") as fp:
+json_path = Path("json")
+json_path.mkdir(parents=True, exist_ok=True)
+
+with open(json_path / "out.json", "w") as fp:
     json.dump({"temperaments": results}, fp)
